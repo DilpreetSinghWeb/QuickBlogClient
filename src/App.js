@@ -1,25 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext, useEffect } from "react";
+import {  Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import axios from "axios";
+import UserContext from "./context/UserContext/UserContext";
+import NewPassword from "./pages/newPassword";
+import CreateProduct from "./pages/CreateProduct";
+import SingleProduct from "./pages/SingleProduct";
+import SingleProductEdit from "./pages/SingleProductEdit";
 
-function App() {
+const App = () => {
+  const {setUser} = useContext(UserContext);
+
+  useEffect(()=>{
+    let token = localStorage.getItem('token');
+    if(token){
+      axios
+      .get("http://localhost:8000/user/verify", {headers:{Authorization: `Bearer ${token}`}})
+      .then((res) => {
+        setUser(res.data.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    }
+    
+  },[setUser])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Routes>
+        <Route path="/" element={<Home  />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/updatepassword" element={<NewPassword />} />
+
+        {/* Create product */}
+        <Route path="/product/create" element={<CreateProduct />} />
+
+        
+        <Route path="/product/singleproduct/edit/:id" element={<SingleProductEdit />} />
+
+
+        <Route path="/product/singleproduct/:id" element={<SingleProduct />} />
+        
+      </Routes>
     </div>
   );
-}
+};
 
 export default App;
