@@ -1,30 +1,41 @@
-import React, { useState } from "react";
-import Navbar from "../components/Navbar";
+import React, { useEffect, useState } from "react";
+
 import axios from "axios";
 import validationCriteria from "../validation/RegisterValidationArray";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { showErrorToast, showSuccessToast } from "../toast/customToasts";
+import SpinnerBtn from "../components/SpinnerBtn";
+import { BASE_URL } from "../config";
 
 const NewPassword = () => {
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
-    const navigate = useNavigate();
+  const [otp, setOtp] = useState("");
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [isStrong, setIsStrong] = useState({
-    hasLength:false,
+    hasLength: false,
     hasUppercase: false,
     hasNumber: false,
     hasSpecialChar: false,
   });
 
+  useEffect(() => {
+    if (location.state && location.state.email) {
+      setEmail(location.state.email);
+    }
+  }, [location.state]);
+
   const validatePassword = (password) => {
-    const hasLength = password.length >=8;
+    const hasLength = password.length >= 8;
     const hasUppercase = /[A-Z]/.test(password);
     const hasNumber = /\d/.test(password);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
@@ -37,7 +48,6 @@ const NewPassword = () => {
     });
   };
 
-
   const togglePasswordVisibility = () => {
     setIsPasswordVisible((prevState) => !prevState);
   };
@@ -45,27 +55,64 @@ const NewPassword = () => {
     setIsConfirmPasswordVisible((prevState) => !prevState);
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(password !== confirmPassword){
-      alert("Password is not same!")
+    if (password !== confirmPassword) {
+      showErrorToast("Password is not same!");
     }
     try {
-      const response = await axios.post("http://localhost:8000/user/updatepassword", { email, password,confirmPassword });
-      console.log(response);
-      alert("Password Updated Successfully");
+      await axios.post(`${BASE_URL}user/verifyotp`, {
+        email,
+        otp,
+      });
+      await axios.post(`${BASE_URL}/user/updatepassword`, {
+        email,
+        password,
+        confirmPassword,
+      });
+      showSuccessToast("Password Updated Successfully");
       navigate("/login");
-
     } catch (err) {
-      alert(err.response.data.message);
+      showErrorToast(err.response.data.message);
     }
   };
-  
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (email === "" || password === "" || confirmPassword === "") {
+        setIsLoading(false);
+        showErrorToast("All fields are required!");
+        return;
+      }
+      if (
+        !isStrong.hasLength ||
+        !isStrong.hasUppercase ||
+        !isStrong.hasNumber ||
+        !isStrong.hasSpecialChar
+      ) {
+        setIsLoading(false);
+        showErrorToast("Password does not meet the strength criteria!");
+        return;
+      }
+
+      setIsLoading(true);
+      await axios.post(`${BASE_URL}/user/userotp`, {
+        email,
+        password,
+      });
+
+      showSuccessToast("OTP Send Successfully!");
+      setIsOtpSent(true);
+    } catch (err) {
+      setIsLoading(false);
+      showErrorToast(err.response.data.message);
+    }
+  };
 
   return (
     <>
-      <Navbar />
       <section className="text-gray-600 body-font relative  ">
         <div className="container lg:w-1/3 md:w-1/2 px-5 flex  mx-auto  sm:flex-nowrap flex-wrap py-8">
           <form
@@ -76,7 +123,10 @@ const NewPassword = () => {
               Change Password
             </h1>
             <div className="relative mb-4">
-              <label htmlFor="email" className="leading-7 text-sm text-gray-600">
+              <label
+                htmlFor="email"
+                className="leading-7 text-sm text-gray-600"
+              >
                 Email
               </label>
               <input
@@ -271,15 +321,64 @@ const NewPassword = () => {
                 )}
               </button>
             </div>
+            
 
-            <div className="flex items-center justify-center">
-              <button
-                type="submit"
-                className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-lg w-1/2 "
-              >
-                Update
-              </button>
-            </div>
+            {!isOtpSent ? (
+              <div className="flex items-center justify-center">
+                <button
+                  onClick={handleOtpSubmit}
+                  className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-md   "
+                >
+                  {isLoading ? (
+                    <div className="flex gap-3">
+                      <span> Getting an Otp... </span>
+                      <SpinnerBtn />
+                    </div>
+                  ) : (
+                    "Get an Otp"
+                  )}
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="relative mb-4">
+                  <label
+                    htmlFor="otp"
+                    className="leading-7 text-sm text-gray-600"
+                  >
+                    OTP !
+                  </label>
+                  <div className="flex gap-4">
+                    <input
+                      type="tel"
+                      value={otp}
+                      onChange={(e) => {
+                        if (
+                          /^\d*$/.test(e.target.value) &&
+                          e.target.value.length <= 6
+                        ) {
+                          setOtp(e.target.value);
+                        }
+                      }}
+                      id="otp"
+                      name="otp"
+                      placeholder="Enter Your OTP!"
+                      className="w-full bg-transparent rounded border border-gray-300 focus:border-slate-800  focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                      autoComplete="name"
+                      maxLength={6}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-center">
+                  <button
+                    type="submit"
+                    className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-lg w-1/2 "
+                  >
+                    Update
+                  </button>
+                </div>
+              </>
+            )}
           </form>
         </div>
       </section>

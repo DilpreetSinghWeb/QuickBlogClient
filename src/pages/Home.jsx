@@ -1,15 +1,16 @@
 import React from "react";
-import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import Products from "../components/Products";
+import Footer from "../components/Footer";
+import Steps from "../components/Steps";
 
 const Home = () => {
   return (
     <div>
-      <Navbar />
-    <Hero />
-    <Products />
-
+      <Hero />
+      <Products />
+      <Steps />
+      <Footer />
     </div>
   );
 };

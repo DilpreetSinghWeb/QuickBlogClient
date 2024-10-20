@@ -9,6 +9,10 @@ import NewPassword from "./pages/newPassword";
 import CreateProduct from "./pages/CreateProduct";
 import SingleProduct from "./pages/SingleProduct";
 import SingleProductEdit from "./pages/SingleProductEdit";
+import Navbar from "./components/Navbar";
+import "./index.css"
+import { BASE_URL } from "./config";
+
 
 const App = () => {
   const {setUser} = useContext(UserContext);
@@ -17,7 +21,7 @@ const App = () => {
     let token = localStorage.getItem('token');
     if(token){
       axios
-      .get("http://localhost:8000/user/verify", {headers:{Authorization: `Bearer ${token}`}})
+      .get(`${BASE_URL}/user/verify`, {headers:{Authorization: `Bearer ${token}`}})
       .then((res) => {
         setUser(res.data.data);
       })
@@ -30,6 +34,7 @@ const App = () => {
 
   return (
     <div>
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home  />} />
         <Route path="/login" element={<Login />} />
@@ -44,6 +49,7 @@ const App = () => {
 
 
         <Route path="/product/singleproduct/:id" element={<SingleProduct />} />
+
         
       </Routes>
     </div>

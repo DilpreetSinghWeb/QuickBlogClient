@@ -1,23 +1,30 @@
 import React, { useState } from "react";
-import Navbar from "../components/Navbar";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import defaultImg from "../images/placeholder_pic.jpg";
 import validationCriteria from "../validation/RegisterValidationArray";
 
 import "react-toastify/dist/ReactToastify.css";
 import { showErrorToast, showSuccessToast } from "../toast/customToasts";
+import SpinnerBtn from "../components/SpinnerBtn";
+import { BASE_URL } from "../config";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isOtpSent, setIsOtpSent] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [photo, setPhoto] = useState(defaultImg);
+  const [file, setFile] = useState(null);
   const [isStrong, setIsStrong] = useState({
     hasLength: false,
     hasUppercase: false,
     hasNumber: false,
     hasSpecialChar: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -38,34 +45,90 @@ const Register = () => {
     setIsPasswordVisible((prevState) => !prevState);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const isConfirmed = window.confirm(
-      "Are you sure you want to log out from QuikBuy?"
-    );
-    if (!isConfirmed) {
-      return;
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setPhoto(imageUrl); 
+      setFile(file);
     }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
 
     try {
-      await axios
-        .post("http://localhost:8000/user/register", { name, email, password })
-        .then(() => {
-          navigate("/login",{
-            state:{message:"You've successfully registered. You can now log in!"}
-          });
-          showSuccessToast("You've successfully registered. You can now log in!");
-        });
+      if (name === "" || email === "" || password === "" ) {
+        setIsLoading(false);
+        showErrorToast("All fields are required!");
+        return;
+      }
+      if(file===null){
+        setIsLoading(false);
+        showErrorToast("Please select a photo!");
+        return;
+      }
+      if (
+        !isStrong.hasLength ||
+        !isStrong.hasUppercase ||
+        !isStrong.hasNumber ||
+        !isStrong.hasSpecialChar
+      ) {
+        setIsLoading(false);
+        showErrorToast("Password does not meet the strength criteria!");
+        return;
+      }
+
+
+      setIsLoading(true);
+      await axios.post(`${BASE_URL}/user/userotp`, {
+        name,
+        email,
+        password,
+        
+      });
+
+      showSuccessToast("OTP Send Successfully!");
+      setIsOtpSent(true);
+      setIsLoading(false);
     } catch (err) {
+      setIsLoading(false);
+      showErrorToast(err.response.data.message);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+setIsLoading(true);
+    try {
+      await axios.post(`${BASE_URL}/user/verifyotp`, {
+        email,
+        otp,
+      });
+
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("photo", file); 
       
-      showErrorToast("Registration failed. Please try again.")
+       await axios.post(`${BASE_URL}/user/register`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      navigate("/login");
+      showSuccessToast("You've successfully registered. You can now log in!");
+      setIsLoading(false);
+    } catch (err) {
+      setIsLoading(false);
+      showErrorToast(err.response.data.message);
     }
   };
 
   return (
     <>
-      
-      <Navbar />
       <section className="text-gray-600 body-font relative  ">
         <div className="container lg:w-1/3 md:w-1/2 px-2 flex  mx-auto  sm:flex-nowrap flex-wrap py-8">
           <form
@@ -190,9 +253,9 @@ const Register = () => {
                 </button>
               </div>
 
-              <ul className="text-xs text-zinc-400 mt-2">
+              <ul className="text-xs text-zinc-400 my-4">
                 {validationCriteria.map(({ key, check, text }) => (
-                  <li key={key} className="flex items-center">
+                  <li key={key} className="flex items-center text-sm my-2">
                     <span>
                       {check(isStrong) ? (
                         <svg
@@ -226,15 +289,79 @@ const Register = () => {
                   </li>
                 ))}
               </ul>
+
+              <div className="flex gap-4 items-center">
+                <figure className="w-[60px] h-[60px] rounded-full border-2 border-solid border-emerald-600 flex items-center justify-center overflow-hidden">
+                  <img src={photo} alt="user" accept=".jpg,.png" />
+                </figure>
+
+                <div className="relative w-[130px] h-[50px] ">
+                  <input className="hidden" type="file" accept="image/png, image/jpeg, image/jpg, image/gif" name="photo" id="customFile" onChange={handlePhotoChange} required/>
+                  <label className="absolute top-0 left-0 w-full h-full items-center px-3 py-3 overflow-hidden bg-gray-300 tracking-wide font-semibold rounded cursor-pointer" htmlFor="customFile">Upload Photo</label>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-center">
-              <button
-                type="submit"
-                className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-lg w-1/2 "
-              >
-                Register
-              </button>
-            </div>
+
+            {!isOtpSent ? (
+              <div className="flex items-center justify-center">
+                <button
+                  onClick={handleOtpSubmit}
+                  className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-md   "
+                >
+                  {isLoading ? (
+                    <div className="flex gap-3">
+                      <span> Getting an Otp... </span>
+                      <SpinnerBtn />
+                    </div>
+                  ) : (
+                    "Get an Otp"
+                  )}
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="relative mb-4">
+                  <label
+                    htmlFor="otp"
+                    className="leading-7 text-sm text-gray-600"
+                  >
+                    OTP !
+                  </label>
+                  <div className="flex gap-4">
+                    <input
+                      type="tel"
+                      value={otp}
+                      onChange={(e) => {
+                        if (
+                          /^\d*$/.test(e.target.value) &&
+                          e.target.value.length <= 6
+                        ) {
+                          setOtp(e.target.value);
+                        }
+                      }}
+                      id="otp"
+                      name="otp"
+                      placeholder="Enter Your OTP!"
+                      className="w-full bg-transparent rounded border border-gray-300 focus:border-slate-800  focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                      autoComplete="name"
+                      maxLength={6}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-center">
+                <button
+  type="submit"
+  className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-lg w-1/2"
+>
+  {isLoading ? (
+    <SpinnerBtn text="Registering..." />
+  ) : (
+    "Register"
+  )}
+</button>
+                </div>
+              </>
+            )}
           </form>
         </div>
       </section>

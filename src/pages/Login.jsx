@@ -1,14 +1,17 @@
 import React, { useContext, useState } from "react";
-import Navbar from "../components/Navbar";
+
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext/UserContext";
 import { showErrorToast, showSuccessToast } from "../toast/customToasts";
+import { BASE_URL } from "../config";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { setUser } = useContext(UserContext);
+  
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const navigate = useNavigate();
 
@@ -16,12 +19,19 @@ const Login = () => {
     setIsPasswordVisible((prevState) => !prevState);
   };
 
+  const handleForgotPassword = () => {
+    localStorage.setItem("email", email);
+    navigate("/updatepassword",{state:{email}});
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8000/user/login", { email, password })
+      .post(`${BASE_URL}/user/login`, { email, password })
       .then((res) => {
-        setUser(res.data.user);
+        const {user} =res.data;
+        const { password, ...userData } = user;
+        setUser(userData);
         localStorage.setItem("token", res.data.token);
         navigate("/");
         showSuccessToast("login successful");
@@ -33,7 +43,6 @@ const Login = () => {
 
   return (
     <>
-      <Navbar />
       <section className="text-gray-600 body-font relative  ">
         <div className="container lg:w-1/3 md:w-1/2 px-5 flex  mx-auto  sm:flex-nowrap flex-wrap py-8">
           <form
@@ -62,6 +71,7 @@ const Login = () => {
                 placeholder="Email!"
                 className="w-full bg-transparent rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                 required
+                
               />
             </div>
             <div className="relative mb-2">
@@ -136,12 +146,13 @@ const Login = () => {
                 )}
               </button>
             </div>
-            <Link
-              to="/updatepassword"
+            <button
+            type="button"
+              onClick={handleForgotPassword}
               className="text-right mb-2 text-xs cursor-pointer "
             >
               Forget password?
-            </Link>
+            </button>
             <div className="flex items-center justify-center">
               <button
                 type="submit"
@@ -153,6 +164,8 @@ const Login = () => {
           </form>
         </div>
       </section>
+
+      
     </>
   );
 };

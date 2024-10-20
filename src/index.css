@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base{
+    section{
+        @apply py-[75px]
+    }
+    li{list-style: none;}
+}
+
+@layer components{
+    .container{
+        @apply w-[1200px] px-5 mx-auto;
+    }
+}
+@media only screen and (max-width: 1024px) {
+    .container{
+        @apply w-full;
+    }
+    section{
+        @apply py-[35px];
+    }
+}
