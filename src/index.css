@@ -2,23 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base{
-    section{
-        @apply py-[75px]
-    }
-    li{list-style: none;}
+@layer base {
+  section {
+    @apply py-[75px];
+  }
+  li {
+    list-style: none;
+  }
 }
 
-@layer components{
-    .container{
-        @apply w-[1200px] px-5 mx-auto;
-    }
+@layer components {
+  .container {
+    @apply w-[1200px] px-5 mx-auto;
+  }
+  
+  .mobile_view {
+    @apply flex; /* Default to flex (visible) on mobile */
+  }
 }
+
+@media only screen and (min-width: 768px) {
+  .mobile_view {
+    @apply hidden; /* Hide on medium screens and above */
+  }
+}
+
 @media only screen and (max-width: 1024px) {
-    .container{
-        @apply w-full;
-    }
-    section{
-        @apply py-[35px];
-    }
+  .container {
+    @apply w-full;
+  }
+  section {
+    @apply py-[35px];
+  }
 }

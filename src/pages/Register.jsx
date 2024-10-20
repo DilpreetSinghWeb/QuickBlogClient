@@ -49,7 +49,7 @@ const Register = () => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setPhoto(imageUrl); 
+      setPhoto(imageUrl);
       setFile(file);
     }
   };
@@ -58,12 +58,12 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      if (name === "" || email === "" || password === "" ) {
+      if (name === "" || email === "" || password === "") {
         setIsLoading(false);
         showErrorToast("All fields are required!");
         return;
       }
-      if(file===null){
+      if (file === null) {
         setIsLoading(false);
         showErrorToast("Please select a photo!");
         return;
@@ -85,7 +85,7 @@ const Register = () => {
         name,
         email,
         password,
-        
+
       });
 
       showSuccessToast("OTP Send Successfully!");
@@ -99,7 +99,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-setIsLoading(true);
+    setIsLoading(true);
     try {
       await axios.post(`${BASE_URL}/user/verifyotp`, {
         email,
@@ -110,14 +110,14 @@ setIsLoading(true);
       formData.append("name", name);
       formData.append("email", email);
       formData.append("password", password);
-      formData.append("photo", file); 
-      
-       await axios.post(`${BASE_URL}/user/register`, formData, {
+      formData.append("photo", file);
+
+      await axios.post(`${BASE_URL}/user/register`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       navigate("/login");
       showSuccessToast("You've successfully registered. You can now log in!");
       setIsLoading(false);
@@ -296,7 +296,7 @@ setIsLoading(true);
                 </figure>
 
                 <div className="relative w-[130px] h-[50px] ">
-                  <input className="hidden" type="file" accept="image/png, image/jpeg, image/jpg, image/gif" name="photo" id="customFile" onChange={handlePhotoChange} required/>
+                  <input className="hidden" type="file" accept="image/png, image/jpeg, image/jpg, image/gif" name="photo" id="customFile" onChange={handlePhotoChange} required />
                   <label className="absolute top-0 left-0 w-full h-full items-center px-3 py-3 overflow-hidden bg-gray-300 tracking-wide font-semibold rounded cursor-pointer" htmlFor="customFile">Upload Photo</label>
                 </div>
               </div>
@@ -349,16 +349,17 @@ setIsLoading(true);
                   </div>
                 </div>
                 <div className="flex items-center justify-center">
-                <button
-  type="submit"
-  className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-lg w-1/2"
->
-  {isLoading ? (
-    <SpinnerBtn text="Registering..." />
-  ) : (
-    "Register"
-  )}
-</button>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-lg w-1/2"
+                  >
+                    {isLoading ? (
+                      <SpinnerBtn text="Registering..." />
+                    ) : (
+                      "Register"
+                    )}
+                  </button>
                 </div>
               </>
             )}

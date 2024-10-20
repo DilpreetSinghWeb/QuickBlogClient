@@ -8,7 +8,7 @@ import SpinnerBtn from "../components/SpinnerBtn";
 import { formatDate } from "../utils/formatDate";
 import Review from "../components/Review";
 import { BASE_URL } from "../config";
-
+import { TailSpin } from 'react-loader-spinner';
 
 const SingleProduct = () => {
   const { id } = useParams();
@@ -16,20 +16,24 @@ const SingleProduct = () => {
   const [product, setProduct] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
- 
+
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProduct = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get(
           `${BASE_URL}/product/singleproduct/${id}`
         );
-        
+
         setProduct({ ...response.data.product });
       } catch (err) {
         showErrorToast("An unexpected error occurred. Please try again.");
+        setIsLoading(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -59,17 +63,33 @@ const SingleProduct = () => {
       navigate("/");
     } catch (error) {
       showErrorToast("Product Not Found!");
+    } finally {
+      setIsLoading(false);
     }
   };
 
- 
+
 
   return (
     <>
       <section className="text-gray-600 body-font">
         <div className="container px-5 py-6 mx-auto flex flex-col">
           <div className="lg:w-full mx-auto lg:px-10">
-            <div className="rounded-lg h:72 lg:h-80 overflow-hidden">
+            {isLoading ? (
+              <div className="mt-20 flex justify-center items-center">
+                <TailSpin
+        height="80"
+        width="80"
+        color="#10B981" // Change color as per your design
+        ariaLabel="tail-spin-loading"
+        radius="1"
+        wrapperStyle={{}}
+        visible={true}
+      />
+              </div>
+            ):(
+              <>
+              <div className="rounded-lg h:72 lg:h-80 overflow-hidden">
               <img
                 alt={product.title}
                 className="object-cover object-center h-full w-full"
@@ -172,6 +192,9 @@ const SingleProduct = () => {
                 </Link>
               </div>
             </div>
+              </>
+            )}
+            
           </div>
         </div>
       </section>

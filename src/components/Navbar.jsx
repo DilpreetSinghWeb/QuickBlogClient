@@ -47,7 +47,7 @@ const Navbar = () => {
         {/* Menu for large screens */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link to="/" className="hover:text-gray-900">Home</Link>
-          <a href="#products" className="hover:text-gray-900">Products</a>
+          <a href="#products" className="hover:text-gray-900">Blogs</a>
           {user && (
             <Link to="/product/create" className="hover:text-gray-900">
               Create Blog
@@ -87,7 +87,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile menu button with user name on the left */}
-        <div className="md:hidden flex items-center">
+        <div className="mobile_view flex">
           {user && (
             <h1 className="mr-3 font-medium text-sm  sm:text-md text-gray-800 flex items-center justify-center gap-3" >
              <FaUser size={15} />  {user.name}

@@ -1,11 +1,10 @@
 import React, { useContext, useState } from "react";
-
 import axios from "axios";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext/UserContext";
 import { showErrorToast, showSuccessToast } from "../toast/customToasts";
 import { BASE_URL } from "../config";
-
+import Spinner from "../components/SpinnerBtn";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,6 +12,7 @@ const Login = () => {
   const { setUser } = useContext(UserContext);
   
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // New loading state
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -21,33 +21,37 @@ const Login = () => {
 
   const handleForgotPassword = () => {
     localStorage.setItem("email", email);
-    navigate("/updatepassword",{state:{email}});
-  }
+    navigate("/updatepassword", { state: { email } });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsLoading(true); // Set loading state to true
     axios
       .post(`${BASE_URL}/user/login`, { email, password })
       .then((res) => {
-        const {user} =res.data;
+        const { user } = res.data;
         const { password, ...userData } = user;
         setUser(userData);
         localStorage.setItem("token", res.data.token);
         navigate("/");
-        showSuccessToast("login successful");
+        showSuccessToast("Login successful");
       })
       .catch((err) => {
         showErrorToast(err.response.data.message);
+      })
+      .finally(() => {
+        setIsLoading(false); // Set loading state back to false
       });
   };
 
   return (
     <>
-      <section className="text-gray-600 body-font relative  ">
-        <div className="container lg:w-1/3 md:w-1/2 px-5 flex  mx-auto  sm:flex-nowrap flex-wrap py-8">
+      <section className="text-gray-600 body-font relative">
+        <div className="container lg:w-1/3 md:w-1/2 px-5 flex mx-auto sm:flex-nowrap flex-wrap py-8">
           <form
             onSubmit={handleSubmit}
-            className=" p-12  border rounded-lg  flex flex-col  w-full  mt-8 md:mt-0"
+            className="p-12 border rounded-lg flex flex-col w-full mt-8 md:mt-0"
           >
             <h1 className="text-gray-800 text-4xl mb-4 font-medium title-font text-center tracking-wider">
               Login
@@ -71,7 +75,6 @@ const Login = () => {
                 placeholder="Email!"
                 className="w-full bg-transparent rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                 required
-                
               />
             </div>
             <div className="relative mb-2">
@@ -147,25 +150,26 @@ const Login = () => {
               </button>
             </div>
             <button
-            type="button"
+              type="button"
               onClick={handleForgotPassword}
-              className="text-right mb-2 text-xs cursor-pointer "
+              className="text-right mb-2 text-xs cursor-pointer"
             >
-              Forget password?
+              Forgot password?
             </button>
             <div className="flex items-center justify-center">
               <button
                 type="submit"
-                className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-lg w-1/2 "
+                className="text-white bg-emerald-600 border-0 py-2 px-6 focus:outline-none hover:bg-emerald-700 rounded text-lg w-1/2"
+                disabled={isLoading} // Disable button while loading
               >
-                Login
+                {isLoading ?<div className="flex gap-3 items-center justify-center">
+                  Logging in... <Spinner />
+                </div>: "Login"}
               </button>
             </div>
           </form>
         </div>
       </section>
-
-      
     </>
   );
 };
