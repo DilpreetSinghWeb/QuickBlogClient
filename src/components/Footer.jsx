@@ -8,7 +8,7 @@ const Footer = () => {
   const socialIcons = [
     { id: 1, icon: <FaGithub size={iconSize} />, link: 'https://github.com/DilpreetSinghWeb', target: '_blank' },
 
-    { id: 2, icon: <FaLinkedinIn size={iconSize} />, link: 'www.linkedin.com/in/dilpreet-singh65', target: '_blank' },
+    { id: 2, icon: <FaLinkedinIn size={iconSize} />, link: 'https://www.linkedin.com/in/dilpreet-singh65/', target: '_blank' },
     { id: 3, icon: <FaEnvelope size={iconSize} />, link: 'mailto:dilpreetweb65@gmail.com' },
   ];
   const phoneNumber = "9877320263";
