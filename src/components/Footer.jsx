@@ -8,7 +8,7 @@ const Footer = () => {
   const socialIcons = [
     { id: 1, icon: <FaGithub size={iconSize} />, link: 'https://github.com/DilpreetSinghWeb', target: '_blank' },
 
-    { id: 2, icon: <FaLinkedinIn size={iconSize} />, link: '/', target: '_blank' },
+    { id: 2, icon: <FaLinkedinIn size={iconSize} />, link: 'www.linkedin.com/in/dilpreet-singh65', target: '_blank' },
     { id: 3, icon: <FaEnvelope size={iconSize} />, link: 'mailto:dilpreetweb65@gmail.com' },
   ];
   const phoneNumber = "9877320263";
@@ -40,7 +40,7 @@ const Footer = () => {
         </span>
       </div>
       <div className="text-center py-4 border-t border-gray-200">
-        <p className="text-sm text-gray-500">© {new Date().getFullYear()} QuickBlog- <Link to={"/"}>
+        <p className="text-sm text-gray-500">© {new Date().getFullYear()} QuickBlog- <Link to={"https://dilpreetsinghportfolio.onrender.com"}>
           <b> Dilpreet Singh.</b> </Link> All Rights Reserved.</p>
       </div>
     </footer>

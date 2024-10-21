@@ -17,13 +17,27 @@
   }
   
   .mobile_view {
-    @apply flex; /* Default to flex (visible) on mobile */
+   display: flex !important; /* Default to flex (visible) on mobile */
+  }
+  .loader{
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .loader p{
+    
+    text-align: center;
+    margin-top: 3px;
+    color: #10B981;
+    font-weight: bold;
   }
 }
 
 @media only screen and (min-width: 768px) {
   .mobile_view {
-    @apply hidden; /* Hide on medium screens and above */
+    display: none !important; /* Hide on medium screens and above */
   }
 }
 

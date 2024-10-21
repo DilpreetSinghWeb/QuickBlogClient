@@ -11,6 +11,7 @@ import SingleProduct from "./pages/SingleProduct";
 import SingleProductEdit from "./pages/SingleProductEdit";
 import Navbar from "./components/Navbar";
 import "./index.css";
+
 import { BASE_URL } from "./config";
 import { ThreeDots } from "react-loader-spinner";
 
@@ -40,8 +41,9 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <ThreeDots type="ThreeDots" color="#10B981" height={80} width={80} />
+      <div className="loader">
+        <ThreeDots type="ThreeDots" color="#10B981" height={40} width={80} />
+        <p>Loading...[can take few seconds]</p>
       </div>
     );
   }
